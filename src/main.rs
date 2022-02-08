@@ -10,6 +10,8 @@ fn main() {
     println!("===========================");
     // add_one_to_number();
     mutable();
+    println!("===========================");
+    basic_type();
 }
 
 fn greet_world() {
@@ -104,6 +106,7 @@ fn add(i: i32, j: i32) -> i32 {
 }
 
 fn mutable() {
+    // 可变变量，值可以在函数中改变，但是类型不能改变
     let mut a = 10;
     println!("a = {}", a);
     a = 20;
@@ -139,6 +142,46 @@ fn mutable() {
     let spaces = "   ";
     // usize数值类型
     let spaces = spaces.len();
-    // 变量的生命周期
     println!("spaces = {}", spaces);
+    // let mut spaces = "   ";
+    // spaces = spaces.len();
+    // 前后spaces的类型是不同的，会报错
+
+    // 变量的生命周期
+    // 前后两个变量的生命周期不一致，会报错， rust对类型要求严格
+    // quote! 宏，用于生成字符串
+}
+
+fn basic_type() {
+    // 基本类型和复合类型
+    // 数值类型: 有符号整数 (i8, i16, i32, i64, isize)、 无符号整数 (u8, u16, u32, u64, usize) 、浮点数 (f32, f64)、以及有理数、复数
+    // 字符串：字符串字面量和字符串切片 &str
+    // 布尔类型： true和false
+    // 字符类型: 表示单个Unicode字符，存储为4个字节
+    // 单元类型: 即 () ，其唯一的值也是 ()
+
+    // 数组：数组是一种有序的集合，其中的元素可以是不同类型的
+    // 元组：元组是一种有序的集合，其中的元素可以是不同类型的
+    // 枚举：枚举是一种构造的类型，其中的元素可以是不同类型的
+    // 注意：枚举和元组的区别在于，枚举是构造的类型，元组是值类型
+    // 元组的元素可以是不同类型的，枚举的元素必须是相同类型的
+
+    // 基本数据类型：bool，char，i8，u8，i16，u16，i32，u32，i64，u64，i128，u128，isize，usize，f32，f64
+    // 基本数据类型的默认值是0，bool默认值是false
+    let a = 10;
+    let b = true;
+    let c = 'c';
+    let d = "hello";
+    let e = [1, 2, 3];
+    let f = vec![1, 2, 3];
+    let g = d.len() as i32;
+    let h = d.len();
+    println!(
+        "a = {}, b = {}, c = {}, d = {}, e = {:?}, f = {:?}, g = {:?}, h = {:?}",
+        a, b, c, d, e, f, g, h
+    );
+
+    let guess: u32 = "42".parse().expect("Not a number!");
+    // let guess = "42".parse::<u32>().expect("Not a number!");
+    println!("guess = {}", guess);
 }
