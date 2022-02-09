@@ -212,7 +212,7 @@ fn basic_type() {
     println!("{}", 0.1 + 0.2); // 0.30000000000000004
     println!("{}", (0.1 + 0.2 - 0.3) < 0.00001); // true
     println!("{}", (0.1 + 0.2 - 0.3) < 0.00002); // false
-    println!("{}", (0.1_f64 + 0.2 - 0.3).abs() < 0.00001);
+    println!("{}", (0.1_f64 + 0.2 - 0.3).abs() < 0.00001); //true
 
     // ======================
     let abc: (f32, f32, f32) = (0.1, 0.2, 0.3);
@@ -228,6 +228,27 @@ fn basic_type() {
     println!("xyz (f64)");
     println!("   0.1 + 0.2: {:x}", (xyz.0 + xyz.1).to_bits());
     println!("         0.3: {:x}", (xyz.2).to_bits());
+
+    assert!(abc.0 + abc.1 == abc.2);
+    assert!(xyz.0 + xyz.1 != xyz.2);
+
+    println!("{}", -42.0_f64.sqrt());
+    println!("{}", -42.0_f32.sqrt());
+    println!("{}", (-42.0_f32).sqrt());
+    let _x = (-42.0_f32).sqrt();
+    // assert_eq!(_x, _x) // NaN不能用来比较
+    // 出于防御性编程的考虑，可以使用 is_nan() 等方法，可以用来判断一个数值是否是 NaN ：
+    if _x.is_nan() {
+        println!("未定义的数学行为{}", "NaN");
+    }
+    // assert!(!_x.is_nan()); // 可以用来判断一个数值是否是 NaN ：
+    // assert!(!_x.is_infinite()); // 无穷大也不是无穷小
+    // assert!(!_x.is_finite()); // 只有 NaN 或者 Infinity 才是无穷大的
+    // assert!(!_x.is_normal()); // 正常数
+    // assert!(!_x.is_sign_positive()); // 正数
+    // assert!(!_x.is_sign_negative()); // 负数
+    // assert!(!_x.is_sign_negative()); // 正负都不是
+    // assert!(!_x.is_sign_positive()); // 正负都不是
 
     // 字符串
 }
