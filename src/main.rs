@@ -242,14 +242,25 @@ fn basic_type() {
         println!("未定义的数学行为{}", "NaN");
     }
     // assert!(!_x.is_nan()); // 可以用来判断一个数值是否是 NaN ：
-    // assert!(!_x.is_infinite()); // 无穷大也不是无穷小
-    // assert!(!_x.is_finite()); // 只有 NaN 或者 Infinity 才是无穷大的
+    // assert!(!_x.is_infinite()); // 无穷大
+    // assert!(!_x.is_finite()); // 有限的，只有 NaN 或者 Infinity 才是无穷大的
     // assert!(!_x.is_normal()); // 正常数
-    // assert!(!_x.is_sign_positive()); // 正数
-    // assert!(!_x.is_sign_negative()); // 负数
-    // assert!(!_x.is_sign_negative()); // 正负都不是
-    // assert!(!_x.is_sign_positive()); // 正负都不是
+    // assert!(_x.is_sign_positive()); // 正数
+    // assert!(_x.is_sign_negative()); // 负数
 
+    // Range(序列)
+    // 序列只允许用于数字或字符类型，原因是：它们可以连续的, 同时编译器在编译期可以检查该序列是否为空，字符和数字值是 Rust 中仅有的可以用于判断是否为空的类型
+    println!("{:?}", 1..5); // 1..5 生成从 1 到 4 的连续数字序列
+    println!("{:?}", 1..=5); // 1..=5 生成从 1 到 5 的连续数字序列
+    for i in 1..=5 {
+        println!("{}", i);
+    }
+    for i in 'a'..'f' {
+        println!("{}", i);
+    }
+    // 有理数和复数
+    // 任意大小的整数和任意精度的浮点数
+    // 固定精度的十进制小数，常用于货币相关的场景
     // 字符串
 }
 
