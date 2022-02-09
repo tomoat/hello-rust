@@ -2,6 +2,8 @@ fn main() {
     // println!("Hello, world!");
     greet_world();
     println!("===========================");
+    test();
+    println!("===========================");
     penguin();
     println!("===========================");
     add_one();
@@ -154,7 +156,7 @@ fn mutable() {
 
 fn basic_type() {
     // 基本类型和复合类型
-    // 数值类型: 有符号整数 (i8, i16, i32, i64, isize)、 无符号整数 (u8, u16, u32, u64, usize) 、浮点数 (f32, f64)、以及有理数、复数
+    // 数值类型: 有符号整数integer (i8, i16, i32, i64, isize)、 无符号整数unsigned (u8, u16, u32, u64, usize) 、浮点数 (f32, f64)、以及有理数、复数
     // 字符串：字符串字面量和字符串切片 &str
     // 布尔类型： true和false
     // 字符类型: 表示单个Unicode字符，存储为4个字节
@@ -184,4 +186,55 @@ fn basic_type() {
     let guess: u32 = "42".parse().expect("Not a number!");
     // let guess = "42".parse::<u32>().expect("Not a number!");
     println!("guess = {}", guess);
+
+    // f32 类型是单精度浮点型，f64 为双精度浮点型
+    let m = 2.2;
+    let n: f32 = 3.3;
+    println!("m = {}, n = {}", m, n);
+
+    let sum = m + m;
+    let difference = 96.2 - 4.3;
+    let product = 2 * 3;
+    let quotient = 56.7 / 32.2;
+    let remainder = 43 % 5;
+
+    println!(
+        "sum = {}, difference = {:.2}, product = {}, quotient = {}, remainder = {}",
+        sum, difference, product, quotient, remainder
+    );
+
+    // assert!(0.1 + 0.2 == 0.3);
+    // assert!((0.1 + 0.2 - 0.3) < 0.1);
+    println!("{}", 0.1 + 0.2 == 0.3); // false
+    println!("{}", (0.1 + 0.2 - 0.3) < 0.1); // true
+    println!("{}", (0.1 + 0.2 - 0.3) < 0.2); // false
+    println!("{}", (0.1 + 0.2 - 0.3)); // 0.00000000000000005551115123125783
+    println!("{}", 0.1 + 0.2); // 0.30000000000000004
+    println!("{}", (0.1 + 0.2 - 0.3) < 0.00001); // true
+    println!("{}", (0.1 + 0.2 - 0.3) < 0.00002); // false
+    println!("{}", (0.1_f64 + 0.2 - 0.3).abs() < 0.00001);
+
+    // ======================
+    let abc: (f32, f32, f32) = (0.1, 0.2, 0.3);
+    let xyz: (f64, f64, f64) = (0.1, 0.2, 0.3);
+
+    println!("{:?}", abc);
+    println!("{:?}", xyz);
+    println!("{:?}", abc.0);
+    println!("abc (f32)");
+    println!("   0.1 + 0.2: {:x}", (abc.0 + abc.1).to_bits());
+    println!("         0.3: {:x}", (abc.2).to_bits());
+
+    println!("xyz (f64)");
+    println!("   0.1 + 0.2: {:x}", (xyz.0 + xyz.1).to_bits());
+    println!("         0.3: {:x}", (xyz.2).to_bits());
+
+    // 字符串
+}
+
+fn test() {
+    #[allow(unused_assignments)]
+    let mut aa = 10;
+    aa = 2021;
+    println!("aa = {}", aa);
 }
