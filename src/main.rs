@@ -1,3 +1,7 @@
+// mod factorial;
+// mod issues;
+// mod threads;
+
 fn main() {
     // println!("Hello, world!");
     greet_world();
@@ -331,10 +335,22 @@ fn char() {
 
 // 函数表达式是一种特殊的函数，它的类型是它被调用时所返回的类型。
 // 函数表达式可以用来创建一个函数，也可以用来调用一个函数。
+// main函数是一个函数表达式，它的类型是()->()，也就是说它返回一个函数，这个函数没有参数，返回值也是()。
+// 表达式不能包含分号，一旦在表达式后加上分号，它就会变成一条语句，再也不会返回一个值
 fn expression_fuc() {
+    (|x: i32, y: i32| x + y)(1, 2);
+    #[allow(unused_variables)]
+    let a = 8;
+    let b: Vec<f64> = Vec::new();
+    let (a, c) = ("hi", false);
+    println!("{} {:?} {}", a, b, c);
     let expr = add_with_extra(10, 20);
     println!("{}", expr);
 }
+
+// 函数名和变量名使用蛇形命名法(snake case)，例如 fn add_two() -> {}
+// 函数的位置可以随便放，Rust 不关心我们在哪里定义了函数，只要有定义即可
+// 每个函数参数都需要标注类型
 // Rust 的函数体是由一系列语句组成，最后由一个表达式来返回值，例如：
 fn add_with_extra(x: i32, y: i32) -> i32 {
     // 语句会执行一些操作但是不会返回一个值，而表达式会在求值后返回一个值
