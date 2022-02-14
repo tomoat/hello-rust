@@ -447,11 +447,57 @@ fn ownership() {
     println!("{}", s2);
     println!("{}", s3);
     // assert!(s3 == s);
+
+    // Rust 永远也不会自动创建数据的 “深拷贝” 因此，任何自动的复制都不是深拷贝，可以被认为对运行时性能影响较小
+    // 如果我们确实需要深度复制 String 中堆上的数据，而不仅仅是栈上的数据，可以使用一个叫做 clone 的方法。
+    // 在 Rust 中，所有的数据类型都是值类型，值类型的数据在被赋值或传递时，会被复制，而引用类型的数据在被赋值或传递时，不会被复制，而是被引用
+    // 对于执行较为频繁的代码(热点路径)，使用 clone 会极大的降低程序性能，需要小心使用！
+
+    let s4 = s3.clone();
+    print!("{}", s4);
+
+    // 浅拷贝只发生在栈上，因此性能很高，在日常编程中，浅拷贝无处不在。
+    // 通用的规则：任何基本类型的组合可以是 Copy 的，不需要分配内存或某种形式资源的类型是 Copy 的
+    // 对于引用类型，如果它的所有者(变量)是 Copy 的，那么它也是 Copy 的
+    // 所有整数类型、所有浮点数类型、布尔类型bool、字符类型char、所有指针类型、所有引用类型、元组（当且仅当其包含的类型也都是 Copy 的时候）和所有结构体类型都是 Copy 的
+    // 将值传递给函数，一样会发生 移动 或者 复制
+    // 如果你想要在函数中修改参数的值，你必须使用引用，而不是值
+    let x = 5;
+    takes_ownership(s3); // s3 被移动到函数内部，因此 s3 不再有效
+    makes_copy(x); // x 被复制到函数内部，但 x 依然有效
+
+    // 同样的，函数返回值也有所有权
+    let s5 = gives_ownership(); // gives_ownership 函数返回值被移动到 s5 中
+    let s6 = String::from("hello"); // s6 被复制到函数内部，但 s6 依然有效
+    let s7 = takes_and_gives_back(s6); // s6 被移动到函数内部，它将返回值赋值给 s7
+    println!("{} {}", s5, s7);
+} // s5,s6, s7 作用域结束后移除，并且清理s5, s7中的内存, s6被移入函数中
+
+fn gives_ownership() -> String {
+    let some_string = String::from("hello"); // some_string 被移动到函数内部
+    some_string // some_string 返回给调用函数并且被移动到函数外部
 }
+// 函数传递给另一个函数时，函数内部的变量会被移动到函数外部，而不是被复制
+// 在函数内部，变量的生命周期仅限于函数内部，函数结束后，变量的生命周期就结束了
+// takes_and_gives_back 将传入字符串移动到函数内部并返回
+fn takes_and_gives_back(a_string: String) -> String {
+    a_string // a_string 被移动到函数外部并返回
+}
+
+fn takes_ownership(some_string: String) {
+    println!("{}", some_string);
+} // 作用域结束，some_string 被丢弃并调用 `drop` 方法。占用的内存被释放
+
+fn makes_copy(some_integer: i32) {
+    println!("{}", some_integer);
+} // 作用域结束，some_integer 依然有效
 
 fn test() {
     #[allow(unused_assignments)]
     let mut aa = 10;
     aa = 2021;
-    println!("aa = {}", aa);
+    #[allow(unused_assignments)]
+    let mut bb = aa;
+    bb = 2022;
+    println!("aa = {} bb = {}", aa, bb);
 }
