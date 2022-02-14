@@ -346,6 +346,14 @@ fn expression_fuc() {
     println!("{} {:?} {}", a, b, c);
     let expr = add_with_extra(10, 20);
     println!("{}", expr);
+
+    let x = plus_or_substract(10);
+    println!("{}", x);
+    let x = plus_or_minus(10, 20);
+    println!("{}", x);
+    report(10);
+    // dead_end();
+    ownership();
 }
 
 // 函数名和变量名使用蛇形命名法(snake case)，例如 fn add_two() -> {}
@@ -357,6 +365,79 @@ fn add_with_extra(x: i32, y: i32) -> i32 {
     let x = x + 1; // 语句
     let y = y + 5; // 语句
     x + y // 表达式
+}
+
+fn plus_or_substract(x: i32) -> i32 {
+    if x > 5 {
+        return x - 5;
+    }
+    x + 5
+}
+fn plus_or_minus(x: i32, y: i32) -> i32 {
+    if x > y {
+        x - y
+    } else {
+        x + y
+    }
+}
+// 单元类型 ()，是一个零长度的元组。它没啥作用，但是可以用来表达一个函数没有返回值：
+// 函数没有返回值，那么隐式返回一个 ()
+// 通过 ; 结尾的表达式返回一个 ()
+
+use std::fmt::Debug;
+// use std::fmt::Display;
+
+// let x = (let y = 5);
+fn report<T: Debug>(item: T) {
+    println!("{:?}", item);
+}
+#[allow(dead_code)]
+// 显式的返回了 ()
+fn clear(text: &mut String) -> () {
+    // text.clear();
+    // text
+    // 将文本处的字符串替换为空字符串
+    *text = String::from("");
+}
+// 永不返回的函数!
+// 当用 `!` 作函数返回值的时候，表示该函数永不返回，特别的，这种语法往往用做会导致程序崩溃的函数：
+#[allow(dead_code)]
+fn dead_end() -> ! {
+    panic!("你已经到了穷途末路，崩溃吧！");
+}
+// 下面的函数创建了一个无限循环，该循环永不跳出，因此函数也永不返回：
+#[allow(dead_code)]
+fn forever() -> ! {
+    loop {
+        //...
+    }
+}
+
+// Rust 中的函数可以有可变参数，可变参数是一个数组，数组的类型是 [T]，其中 T 是可变的，
+// 可变参数在函数调用时会被转换成一个数组，数组的长度是可变参数的个数，数组的元素是可变参数的值。
+// 可变参数的个数可以是 0 个，也可以是任意多个。
+// 可变参数的类型可以是任意类型，但是 Rust 中的所有类型都是可变的
+// Rust提供了一个特殊的可变参数，这个可变参数是一个 & 或者 &mut 的引用，
+// 它可以让函数接受一个可变参数的引用，而不是可变参数的值。
+// 可变参数的引用可以被传递给函数，但是不能被修改，因此函数不能修改参数的值。
+// Rust 提供动态类型，这意味着函数可以接受任意类型的参数，而不需要显式地声明参数的类型。
+// Rust 提供了一个特殊的参数，这个参数是一个 &self 的引用，它可以让函数接受一个自身的引用
+// Rust 提供动态字符串类型：String，它是一个字符串的可变引用，它可以被传递给函数，该类型被分配到堆上，因此可以动态伸缩，也就能存储在编译时大小未知的文本
+// :: 是一种调用操作符
+fn ownership() {
+    let s = String::from("hello");
+    // equals to `let s = "hello".to_string();`
+    let s3 = "hello".to_string();
+    let mut s2 = "hello".to_string();
+    s2.push(char::from(65));
+    // let mut s1 = s;
+    // s1.push_str(" world"); // push_str() 在字符串后追加字面值
+    // println!("{}", s1);
+    println!("{}", s);
+    println!("{}", s2);
+    assert!(s3 == s);
+    // 在 Rust 中，所有权是一种概念，它指的是一个变量拥有了一个值，这个值可以是任何类型的值，
+    // 并且可以在函数中被修改，这个值可以被称为所有者，也可以被称为所有者。
 }
 
 fn test() {
