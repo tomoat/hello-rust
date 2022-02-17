@@ -25,6 +25,13 @@ fn main() {
     println!("===========================");
     expression_fuc();
     println!("===========================");
+    renference_and_dereference();
+    println!("===========================");
+    // println!("{}", factorial::factorial(5));
+    // println!("{}", issues::issues());
+    // println!("{}", threads::threads());
+    compound_types();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -471,6 +478,8 @@ fn ownership() {
     let s6 = String::from("hello"); // s6 被复制到函数内部，但 s6 依然有效
     let s7 = takes_and_gives_back(s6); // s6 被移动到函数内部，它将返回值赋值给 s7
     println!("{} {}", s5, s7);
+
+    // 所有权很强大，避免了内存的不安全性，但是也带来了一个新麻烦:总是把一个值传来传去来使用它。 传入一个函数，很可能还要从该函数传出去，结果就是语言表达变得非常啰嗦，幸运的是，Rust 提供了新功能解决这个问题。
 } // s5,s6, s7 作用域结束后移除，并且清理s5, s7中的内存, s6被移入函数中
 
 fn gives_ownership() -> String {
@@ -491,6 +500,213 @@ fn takes_ownership(some_string: String) {
 fn makes_copy(some_integer: i32) {
     println!("{}", some_integer);
 } // 作用域结束，some_integer 依然有效
+
+// 引用与解引用
+// 引用是一个指针，它指向一个变量的内存地址，而不是变量本身。
+// 引用的作用是让函数能够访问变量的内容，而不能改变变量的内容。
+// 引用的类型是 &T，其中 T 是变量的类型。
+// 引用的作用域是在函数内部，drop 函数不会被调用, 因此引用的变量不会被释放
+// 引用没有所有权，所以它不能被移动，但是它可以被复制
+// 引用的作用域结束后，引用所指向的变量的生命周期也结束了。
+// 可变引用同时具有所有权和可变性，所以它们可以被移动，但是它们不能被复制
+// 可变引用的类型是 &mut T，其中 T 是变量的类型。
+// 可变引用同时只能存在一个，因此它们不能被复制
+// 同一作用域，特定数据只能有一个可变引用
+// 这种限制的好处就是使 Rust 在编译期就避免数据竞争，数据竞争可由以下行为造成：
+// 两个或更多的指针同时访问同一数据
+// 至少有一个指针被用来写入数据
+// 没有同步数据访问的机制
+// 数据竞争会导致未定义行为，这种行为很可能超出我们的预期，难以在运行时追踪，并且难以诊断和修复。而 Rust 避免了这种情况的发生，因为它甚至不会编译存在数据竞争的代码！
+use std::ops::Deref;
+fn renference_and_dereference() {
+    let x = 5;
+    let y = &x; // y 是 x 的引用
+    println!("x = {}, y = {},", x, y);
+    assert_eq!(5, x);
+    assert_eq!(5, *y); // 取引用的值
+
+    assert_eq!(5, *y.deref());
+    // assert_eq!(5, y.deref());
+    // assert_eq!(5, y); // error:无法比较整数类型和引用类型
+
+    // TODO cannot borrow `x` as mutable, as it is not declared as mutable
+    // let z = &mut x; // z 是 x 的引用
+    // println!("x = {}, z = {}", x, z);
+
+    // 不可变引用 `&s` 无法修改引用所指向的变量的值
+    let s = String::from("hello");
+    let len = calculate_length(&s);
+    println!("The length of '{}' is {}.", s, len);
+
+    // 可变引用 `&mut s` 可以修改引用所指向的变量的值
+    let mut s = String::from("hello");
+    let _s = change(&mut s);
+    println!("{}", s);
+
+    {
+        let r1 = &mut s;
+        println!("{}", r1);
+    } // r1 在这里离开了作用域，所以我们完全可以创建一个新的引用
+
+    let r2 = &mut s;
+    println!("{}", r2);
+
+    // 可变引用与不可变引用不能同时存在
+    // 可变引用必须被初始化，不可变引用不能被初始化
+    // 其实这个也很好理解，正在借用不可变引用的用户，肯定不希望他借用的东西，被另外一个人莫名其妙改变了。多个不可变借用被允许是因为没有人会去试图修改数据，每个人都只读这一份数据而不做修改，因此不用担心数据被污染。
+    let mut s = String::from("hello");
+
+    // let r1 = &s; // 没问题
+    // let r2 = &s; // 没问题
+    // let r3 = &mut s; // 大问题, 无法借用可变 `s` 因为它已经被借用了不可变引用
+    // println!("{}, {}, and {}", r1, r2, r3);
+
+    // 引用的作用域 s 从创建开始，一直持续到它最后一次使用的地方，这个跟变量的作用域有所不同，变量的作用域从创建持续到某一个花括号 }
+    let r1 = &s;
+    let r2 = &s;
+    println!("{} and {}", r1, r2);
+    // 新编译器中，r1,r2作用域在这里结束
+
+    let r3 = &mut s;
+    println!("{}", r3);
+
+    dangling_reference();
+}
+// 悬垂引用（Dangling References）
+// 悬垂引用也叫做悬垂指针，意思为指针指向某个值后，这个值被释放掉了，而指针仍然存在，其指向的内存可能不存在任何值或已被其它变量重新使用。在 Rust 中编译器可以确保引用永远也不会变成悬垂状态：当你拥有一些数据的引用，编译器可以确保数据不会在其引用之前被释放，要想释放数据，必须先停止其引用的使用。
+fn dangling_reference() {
+    let reference_to_nothing = dangle();
+    println!("{}", reference_to_nothing);
+}
+// fn dangle() -> &String {
+//     let s = String::from("hello");
+//     // &s
+// } // 这里 s 离开作用域并被丢弃。其内存被释放, 因此&s引用指向一个无效的值
+
+// String的所有权被转移给外面的调用者。
+fn dangle() -> String {
+    let s = String::from("hello");
+    s
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+
+fn change(some_string: &mut String) -> &String {
+    some_string.push_str(", world");
+    some_string
+}
+// fn change(some_string: &mut String) {
+//     some_string.push_str(", world");
+// }
+
+// fn mix_up(a: &str, b: &str) -> String {
+//     let mut result = String::new();
+//     result.push_str(b);
+//     result.push_str(a);
+//     result
+// }
+
+// 复合类型
+// 复合类型是一种类型，它可以是其他类型的子集。
+// 在 Rust 中，复合类型是通过元组（tuple）来实现的，元组是一种复合类型。
+// 元组可以包含不同类型的值，并且每个值都有一个名字。
+// 元组的类型是由其中的每个值的类型组成的。
+
+fn compound_types() {
+    let tuple = (1, 2, 3);
+    let (x, y, z) = tuple;
+    println!("{}, {}, {}", x, y, z);
+
+    let tuple2 = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    let (a, b, c, d, e, f, g, h, i, j) = tuple2;
+    println!(
+        "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}",
+        a, b, c, d, e, f, g, h, i, j
+    );
+    file_operations();
+
+    // structs();
+    // enums();
+    // 字符串String 与 切片 &str
+    let n = 120;
+    greater_than_100(n);
+
+    // 切片(slice)并不是 Rust 独有的概念,它允许你引用集合中部分连续的元素序列，而不是引用整个集合。
+    // 对于字符串而言，切片就是对 String 类型中某一部分的引用，它看起来像这样
+    let s = String::from("Hello World");
+    let s1 = "Jello".to_string();
+    // let s: &str = "World";
+    // let r = &s;
+    let hello = &s[0..5];
+    // equals `let hello = &s[..5];`
+    let world = &s[6..11];
+    // equals `let world = &s[6..];` and `let world = &s[6..s.len()];`
+    greet(s1);
+    println!("{} {}", hello, world);
+
+    // 最典型的就是结构体 struct 和枚举 enum
+    // #[derive(Debug)]
+    // struct Color(i32, i32, i32);
+}
+fn greet(name: String) {
+    println!("Hello, {}!", name);
+}
+fn greater_than_100(n: i32) -> bool {
+    n > 100
+}
+
+// file operations
+fn file_operations() {
+    #![allow(unused_variables)]
+    type File = String;
+    fn open(f: &mut File) -> bool {
+        true
+    }
+    fn close(f: &mut File) -> bool {
+        true
+    }
+    #[allow(dead_code)]
+    fn read(f: &mut File, save_to: &mut Vec<u8>) -> ! {
+        // panic!("not implemented");
+        // 这里的 ! 是一个标识符，表示这个函数不会返回任何值，包括 ()，而是直接终止运行。
+        // read 是一个发散函数，因此它的返回值类型是 !。
+        // 这意味着它的返回值类型是不确定的，因为它可能会在运行时发生错误。
+        // unimplemented!() 告诉编译器该函数尚未实现，并且编译器会终止程序运行。
+        // 类似的标记还有 todo!() 和 unreachable!()。
+        unimplemented!()
+    }
+
+    let mut f1 = File::from("file1.txt");
+    open(&mut f1);
+    // read(&mut f1, &mut Vec::new());
+    // read(&mut f1, &mut Vec![0; 10]);
+    // read(&mut f1, &mut vec![]);
+    close(&mut f1);
+    // let file = File::from("hello.txt");
+    // fn open(f: &mut File) -> Result<(), &str> {
+    //     // ...
+    //     Ok(())
+    // }
+    // fn open(filename: File) -> Result<File, String> {
+    //     Ok(filename)
+    // }
+}
+// fn file_struct() {
+//     #[derive(Debug)]
+//     struct File {
+//         name: String,
+//         size: u64,
+//     }
+//     impl File {
+//         fn new(name: String, size: u64) -> File {
+//             File { name, size }
+//         }
+//     }
+//     let file = File::new(String::from("hello.txt"), 100);
+//     println!("{:?}", file);
+// }
 
 fn test() {
     #[allow(unused_assignments)]
