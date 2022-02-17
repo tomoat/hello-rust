@@ -575,6 +575,7 @@ fn renference_and_dereference() {
 // 悬垂引用（Dangling References）
 // 悬垂引用也叫做悬垂指针，意思为指针指向某个值后，这个值被释放掉了，而指针仍然存在，其指向的内存可能不存在任何值或已被其它变量重新使用。在 Rust 中编译器可以确保引用永远也不会变成悬垂状态：当你拥有一些数据的引用，编译器可以确保数据不会在其引用之前被释放，要想释放数据，必须先停止其引用的使用。
 fn dangling_reference() {
+    // dangle 不能返回悬垂引用&str
     let reference_to_nothing = dangle();
     println!("{}", reference_to_nothing);
 }
@@ -586,7 +587,7 @@ fn dangling_reference() {
 // String的所有权被转移给外面的调用者。
 fn dangle() -> String {
     let s = String::from("hello");
-    s
+    s // 返回值 s 被转移给了函数调用者，s 离开作用域并被丢弃,所以不能返回&s, 因为&s指向的内存已经被释放,否则会成为悬垂引用
 }
 
 fn calculate_length(s: &String) -> usize {
@@ -635,10 +636,16 @@ fn compound_types() {
 
     // 切片(slice)并不是 Rust 独有的概念,它允许你引用集合中部分连续的元素序列，而不是引用整个集合。
     // 对于字符串而言，切片就是对 String 类型中某一部分的引用，它看起来像这样
+    // 切片是描述一组属于同一类型、长度不确定的、在内存中连续存放的数据结构，用 [T] 来表述。因为长度不确定，所以切片是个 DST（Dynamically Sized Type）
+    // 切片的类型是 &[T]，其中 T 是切片所指向的数据类型。
+    // 切片因为长度不确定，属于unsized类型，不能直接访问，所以一般通过&[T]，&mut[T]，Box<[T]>这三种引用方式使用切片。
+    // 切片的类型标识符 &[T] 和 &mut [T] 可以用于指向任何类型的数组，而 Box<[T]> 只能指向数组类型。
+    // &str 类型 与 &String 类型
     let s = String::from("Hello World");
     let s1 = "Jello".to_string();
     // let s: &str = "World";
     // let r = &s;
+    // let all = &s[..];
     let hello = &s[0..5];
     // equals `let hello = &s[..5];`
     let world = &s[6..11];
@@ -646,10 +653,54 @@ fn compound_types() {
     greet(s1);
     println!("{} {}", hello, world);
 
+    let s = "中国人".to_string();
+    // let s = "HELLO";
+    let a = &s[0..3]; // 切片的索引必须落在字符之间的边界位置, 每个汉字占用3个字节，&s[0..2] 就会报错
+    println!("{} {}", a, s.len());
+    greet(s);
+
+    let mut s = String::from("hello world");
+    // #[allow(unused_variables)]
+    let word = first_word(&s);
+    println!("this first word is {}", word); // println 必须在clear之前
+    s.clear(); //  clear(&mut self) 方法清空字符串,此处可变引用尝试调用clear方法
+
+    // 字符串的切片类型是 &str，而不是 &String。 数组的切片类型是 &[T]，而不是 &Vec<T>。
+    // 因为切片是对集合的部分引用，因此不仅仅字符串有切片，其它集合类型也有，例如数组：
+    let a = [1, 2, 3, 4, 5];
+    let slice = &a[1..3]; // 该数组切片的类型是 `&[i32]`
+    println!("{:?}", slice);
+    assert_eq!(slice, &[2, 3]);
+
     // 最典型的就是结构体 struct 和枚举 enum
     // #[derive(Debug)]
     // struct Color(i32, i32, i32);
 }
+//
+fn first_word(s: &String) -> &str {
+    // s[..s.find(' ').unwrap_or(s.len())].trim()
+    &s[..1]
+}
+
+// fn first_word(s &String) -> String {
+//     let bytes = s.as_bytes();
+//     for (i, &item) in bytes.iter().enumerate() {
+//         if item == b' ' {
+//             return s[0..i].to_string();
+//         }
+//     }
+//     s.to_string()
+// }
+
+// fn first_word(s: &String) -> usize {
+//     let bytes = s.as_bytes();
+//     for (i, &item) in bytes.iter().enumerate() {
+//         if item == b' ' {
+//             return i;
+//         }
+//     }
+//     s.len()
+// }
 fn greet(name: String) {
     println!("Hello, {}!", name);
 }
