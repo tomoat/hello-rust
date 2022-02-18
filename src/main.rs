@@ -672,9 +672,73 @@ fn compound_types() {
     println!("{:?}", slice);
     assert_eq!(slice, &[2, 3]);
 
+    // 字符串字面量是切片
+    // 该切片指向了程序可执行文件中的某个点，这也是为什么字符串字面量是不可变的，因为 `&str` 是一个不可变引用
+    // 字符串字面量是不可变的，因为它是一个不可变引用
+    let s = "hello world"; // s 是一个字符串字面量，它的类型是 &str
+    println!("{}", s);
+
+    // 字符串是由字符组成的连续集合
+    // Rust 中的字符是 Unicode 类型，因此每个字符占据 4 个字节内存空间，但是在字符串中不一样，字符串是 UTF8 编码，也就是字符所占的字节数是变化的(1 - 4)，这样有助于大幅降低字符串所占用的内存空间
+    // 当 Rust 用户提到字符串时，往往指的就是 `String` 类型和 `&str` 字符串切片类型，这两个类型都是 UTF8 编码
+    // 除了 `String` 类型的字符串，Rust 的标准库还提供了其他类型的字符串，例如 `OsString`， `OsStr`， `CsString` 和` CsStr` 等，注意到这些名字都以 `String` 或者 `Str` 结尾了吗？它们分别对应的是具有所有权和被借用的变量。
+    let s = "hello world";
+    let c = s.chars().nth(0); // 返回字符串中的第一个字符
+    println!("{} {:?}", s.len(), c); // 字符串长度
+
+    change_string();
     // 最典型的就是结构体 struct 和枚举 enum
     // #[derive(Debug)]
     // struct Color(i32, i32, i32);
+}
+
+// 由于 `String` 是可变字符串，因此我们可以对它进行创建、增删操作
+fn change_string() {
+    let mut s = String::from("hello");
+    s.push_str(", world!");
+    println!("{}", s);
+    // 字符串字面量是不可变的，因此我们不能对它进行修改
+    // let s = "hello";
+    // s.push_str(", world!");
+    // println!("{}", s);
+
+    // 创建一个可变空字符串
+    let mut s = String::new();
+    // 将&str类型的“hello,world”转换成String类型
+    // 从现有的&str切片创建String类型
+    // let s = "hello,world".to_string();
+    // String与&str都是UTF8编码，因此支持中文
+    // let mut s = String::from("你好,世界");
+    // 将&str类型的"hello,world"添加到s中
+    s.push_str("hello,world");
+    // 将字符串s转换成&str类型
+    // let s = s.as_str();
+    // 将字符'!'添加到s中
+    s.push('!');
+    assert_eq!(s, "hello,world!");
+    println!("{}", s);
+
+    let s1 = String::from("hello,");
+    // let s2 = s1.clone();
+    // let s2 = s1;
+    let s2 = String::from("world!");
+    println!("{}", s1.len());
+    // 在下句中，s1的所有权被移，后面不能再使用s1, s2依然可以使用
+    let s3 = s1 + &s2;
+    // 使用 `+` 来对字符串进行相加操作,这里之所以使用 `s1 + &s2` 的形式，是因为 `+` 使用了 `add` 方法, `fn add(self, s: &str) -> String`
+    println!("{} {}", s2, s3);
+
+    // 如果你想要以 Unicode 字符的方式遍历字符串，最好的办法是使用 chars 方法
+    for c in "नमस्ते".chars() {
+        println!("{}", c);
+    }
+    for b in "नमस्ते".bytes() {
+        println!("{}", b);
+    }
+
+    let s = "中国人";
+    let a = &s[0..3];
+    println!("{}", a);
 }
 //
 fn first_word(s: &String) -> &str {
