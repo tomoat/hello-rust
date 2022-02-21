@@ -969,6 +969,24 @@ fn struct_operations() {
     let msg = Message::ChangeColor(Color2::Blue);
     println!("{:?}", msg);
 
+    // - `Quit` 没有任何关联数据
+    // - `Move` 包含一个匿名结构体
+    // - `Write` 包含一个 `String` 字符串
+    // - `ChangeColor` 包含三个 `i32`
+
+    // 当然，我们也可以用结构体的方式来定义这些消息：
+    #[allow(dead_code)]
+    struct QuitMessage; // 元结构体
+    #[allow(dead_code)]
+    struct MoveMessage {
+        x: i32,
+        y: i32,
+    }
+    #[allow(dead_code)]
+    struct WriteMessage(String); // 元组结构体
+    #[allow(dead_code)]
+    struct ChangeColorMessage(i32, i32, i32); // 元组结构体
+
     // enum PokerSuit {
     //     Spades,
     //     Hearts,
@@ -1033,6 +1051,46 @@ fn struct_operations() {
     let c3 = PokerCard::Diamonds(PokerRank::Four);
     let c4 = PokerCard::Clubs(PokerRank::Five);
     println!("{:?} {:?} {:?} {:?}", c1, c2, c3, c4);
+
+    // 同一个枚举类型下的不同成员还能持有不同的数据类型，例如让某些花色打印 1-13 的字样，另外的花色打印上 A-K 的字样：
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum _PokerCard {
+        Clubs(u8),
+        Spades(u8),
+        Diamonds(char),
+        Hearts(char),
+    }
+    let c1 = _PokerCard::Spades(5);
+    let c2 = _PokerCard::Diamonds('A');
+    println!("{:?} {:?}", c1, c2);
+
+    // Option枚举
+    let some_number = Some(5);
+    let some_string = Some("a string");
+    // 如果使用 None 而不是 Some，需要告诉 Rust Option<T> 是什么类型的，因为编译器只通过 None 值无法推断出 Some 成员保存的值的类型
+    let absent_number: Option<i32> = None;
+
+    println!("{:?} {:?} {:?}", some_number, some_string, absent_number);
+
+    // let x: i8 = 5;
+    // let y: Option<i8> = Some(5);
+
+    // let sum = x + y;
+
+    // match 表达式就是这么一个处理枚举的控制流结构：它会根据枚举的成员运行不同的代码，这些代码可以使用匹配到的值中的数据。
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+
+    println!("{:?} {:?}", six, none);
 }
 
 fn test() {
