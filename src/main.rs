@@ -32,6 +32,8 @@ fn main() {
     // println!("{}", threads::threads());
     compound_types();
     println!("===========================");
+    struct_operations();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -694,9 +696,6 @@ fn compound_types() {
     let tup: (i32, f64, u8) = (500, 6.4, 1);
     let (x, y, z) = tup; // 使用模式匹配来解构元组
     println!("{} {} {} {}", x, y, z, tup.2); // 使用.索引来访问元组中的元素
-
-    // 最典型的就是结构体 struct 和枚举 enum
-    // 结构体是一种类型，它允许你定义一组相关的数据，并且这些数据可以是不同类型的。
 }
 
 // 由于 `String` 是可变字符串，因此我们可以对它进行创建、增删操作
@@ -825,6 +824,216 @@ fn file_operations() {
 //     let file = File::new(String::from("hello.txt"), 100);
 //     println!("{:?}", file);
 // }
+
+// 最典型的就是结构体 struct 和枚举 enum
+// 结构体是一种类型，它允许你定义一组相关的数据，并且这些数据可以是不同类型的。
+fn struct_operations() {
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+    impl Point {
+        fn new(x: i32, y: i32) -> Point {
+            Point { x, y }
+        }
+    }
+    let p = Point::new(1, 2);
+    println!("{:?}", p);
+
+    // #[derive(Debug)]
+    struct User {
+        active: bool,
+        username: String,
+        email: String,
+        sign_in_count: u64,
+    }
+    let mut user = User {
+        active: true,
+        username: String::from("someone"),
+        email: String::from("someone@some.com"),
+        sign_in_count: 1,
+    };
+    // 必须要将结构体实例声明为可变的，才能修改其中的字段，Rust 不支持将某个结构体某个字段标记为可变。
+    user.email = String::from("someone@exaple.com");
+
+    // 构建函数，返回结构体
+    fn _build_user(email: String, username: String) -> User {
+        User {
+            email,
+            username,
+            active: true,
+            sign_in_count: 1,
+        }
+    }
+
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+
+    // let user2 = User {
+    //     active: user1.active,
+    //     username: user1.username,
+    //     email: String::from("another@example.com"),
+    //     sign_in_count: user1.sign_in_count,
+    // };
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1
+    };
+
+    println!("{}", user1.active);
+    println!("{:?}", user1.email);
+    println!("{:?}", user1.sign_in_count);
+    println!("{:?}", user2.username);
+    // 下面这行会报错
+    // println!("{:?}", user1);
+    // println!("{:?}", user1.username);
+
+    #[derive(Debug)]
+    struct File {
+        name: String,
+        data: Vec<u8>,
+    }
+
+    // impl File {
+    //     fn new(name: String, data: Vec<u8>) -> File {
+    //         File { name, data }
+    //     }
+    // }
+    let file = File {
+        name: String::from("hello.txt"),
+        // data: vec![0, 1, 2, 3, 4, 5],
+        data: Vec::new(),
+    };
+    let file_name = &file.name;
+    let file_length = &file.data.len();
+    println!("{:?}", file);
+    println!("{} is {} bytes long", file_name, file_length);
+
+    // 元组结构体（Tuple Structs）
+    // 结构体必须要有名称，但是结构体的字段可以没有名称，这种结构体长得很像元组，因此被称为元组结构体
+    // 元组结构体在你希望有一个整体名称，但是又不关心里面字段的名称时将非常有用
+    // add `#[derive(Debug)]` to `Color` or manually `impl Debug for Color`
+    #[derive(Debug)]
+    struct Color(i32, i32, i32);
+    #[derive(Debug)]
+    // 添加下划线_, 就可以避免warning
+    struct Point2 {
+        _x: i32,
+        _y: i32,
+        _z: i32,
+    }
+    let black = Color(0, 0, 0);
+    let origin = Point2 {
+        _x: 0,
+        _y: 0,
+        _z: 0,
+    };
+    println!("{:?}", black);
+    println!("{:?}", origin);
+
+    // 元结构体（Unit-like Structs）
+    // 元结构体是一种特殊的结构体，它没有任何字段和属性
+
+    struct AlwaysEqual;
+    let _subject = AlwaysEqual;
+    // 我们不关心 AlwaysEqual 的字段数据，只关心它的行为，因此将它声明为元结构体，然后再为它实现摸个特征
+
+    // 枚举结构体
+    // 枚举（enumeration）允许通过列举可能的成员来定义一个枚举类型，枚举成员的名字是成员的名字，而不是索引
+    // 通过::操作符来访问枚举成员的名字，而不是索引
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum Color2 {
+        Red,
+        Green,
+        Blue,
+    }
+    let r = Color2::Red;
+    let g = Color2::Green;
+    println!("{:?} {:?}", r, g);
+
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum Message {
+        Quit,
+        Move { x: i32, y: i32 },
+        Write(String),
+        ChangeColor(Color2),
+    }
+    let msg = Message::ChangeColor(Color2::Blue);
+    println!("{:?}", msg);
+
+    // enum PokerSuit {
+    //     Spades,
+    //     Hearts,
+    //     Diamonds,
+    //     Clubs,
+    // }
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    enum PokerRank {
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+        Ten,
+        Jack,
+        Queen,
+        King,
+        Ace,
+    }
+    #[allow(unused_variables)]
+    // struct PokerCard {
+    //     suit: PokerSuit,
+    //     value: u8,
+    // }
+    // #[derive(Debug)]
+    // struct Poker {
+    //     suit: PokerSuit,
+    //     rank: PokerRank,
+    // }
+    // let card = PokerCard {
+    //     suit: PokerSuit::Spades,
+    //     value: 1,
+    // };
+    // enum PokerCard {
+    //     Spades(Poker),
+    //     Hearts(Poker),
+    //     Diamonds(Poker),
+    //     Clubs(Poker),
+    // }
+    // let c1 = PokerCard::Spades(Poker {
+    //     suit: PokerSuit::Spades,
+    //     rank: PokerRank::Two,
+    // });
+
+    // let card = Poker {
+    //     suit: PokerSuit::Spades,
+    //     rank: PokerRank::Two,
+    // };
+    #[derive(Debug)]
+    enum PokerCard {
+        Spades(PokerRank),
+        Hearts(PokerRank),
+        Diamonds(PokerRank),
+        Clubs(PokerRank),
+    }
+    let c1 = PokerCard::Spades(PokerRank::Two);
+    let c2 = PokerCard::Hearts(PokerRank::Three);
+    let c3 = PokerCard::Diamonds(PokerRank::Four);
+    let c4 = PokerCard::Clubs(PokerRank::Five);
+    println!("{:?} {:?} {:?} {:?}", c1, c2, c3, c4);
+}
 
 fn test() {
     #[allow(unused_assignments)]
