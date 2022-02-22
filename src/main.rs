@@ -34,6 +34,8 @@ fn main() {
     println!("===========================");
     struct_operations();
     println!("===========================");
+    array_operations();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -1091,6 +1093,73 @@ fn struct_operations() {
     let none = plus_one(None);
 
     println!("{:?} {:?}", six, none);
+}
+
+// 数组操作
+// 在Rust中，数组是一个结构体，它包含一个数组的元素，以及一个数组的长度。
+// 最常用的数组操作是访问数组中的元素，这些操作可以使用下标来访问数组中的元素。
+// 下标是一个 i32 类型，因此数组中的元素也是 i32 类型。
+// 最常用的数组有两种，第一种是速度很快但长度固定的array, 第二种是可动态增长的但是有性能损耗的Vector，可以使用Vec<T>来表示，（array-数组，Vector-动态数组）
+// 这两种数组的关系跟 &str 和 String 的关系相似，前者是长度固定的字符串切片，后者是可动态增长的字符串。其实，在 Rust 中无论是 String 还是 Vector，它们都是 Rust 的高级类型：集合类型， 因此array存储在栈上，而Vector存储在堆上。
+// : [T; N] 声明一个数组类型，其中 T 是数组中元素的类型，N 是数组的长度。数组类型也从侧面说明了数组的元素类型要统一，长度要固定。
+// 声明一个数组，并且初始化：语法初始化一个某个值重复出现N次的数组：let array = [value; N]; value是数组中的元素的初始化值，N是数组的长度。
+// 当你不确定是使用数组还是动态数组时，那就应该使用动态数组Vector.
+// 数组的具体定义很简单：将多个类型相同的元素依次组合在一起，就是一个数组
+// array: 长度固定，元素必须是相同类型的，依次线性排列
+// 因为数组是连续存放元素的，因此可以通过索引的方式来访问存放其中的元素，索引下标从 0 开始，而不是从 1 开始。
+fn array_operations() {
+    let a = [1, 2, 3, 4, 5];
+    let mut b = [1, 2, 3, 4, 5, 6];
+    let c = ["hello", "world"];
+    println!("{:?} {:?}", b, c);
+    b = [1; 6]; // 可变变量 b 的长度固定为6，不能改变，但元素可变
+    let c = [0; 5]; // 创建一个长度为 5 的数组，其中的所有元素都是 0
+    let d = [3; 5]; // 创建一个长度为 5 的数组，其中的所有元素都是 3
+    println!("{:?} {:?} {:?} {:?}", a, b, c, d);
+
+    // _io_array();
+    // _io_array_mut();
+    // _io_array_slice();
+    // _io_array_iter();
+    // _io_array_iter_mut();
+    // _io_array_index();
+    // _io_array_index_mut();
+    // _io_array_index_mut_error();
+
+    // 数组切片
+    // 数组切片的类型声明是 &[T]，其中 T 是数组的元素类型。
+    let a = [1, 2, 3, 4, 5];
+    let slice = &a[1..3]; // 创建一个数组切片，其中包含 a 的第二个元素，第三个元素。
+    assert_eq!(slice, &[2, 3]);
+    println!("{:?}", slice);
+}
+
+use std::io;
+// 越界访问数组
+// 下面是一个接收用户的控制台输入，然后将其作为索引访问数组元素的例子：
+fn _io_array() {
+    let a = [1, 2, 3, 4, 5];
+
+    println!("Please enter an array index.");
+
+    let mut index = String::new();
+    println!("{:?}", index);
+    // 读取控制台的输出
+    io::stdin()
+        .read_line(&mut index)
+        .expect("Failed to read line");
+
+    let index: usize = index
+        .trim()
+        .parse()
+        .expect("Index entered was not a number");
+
+    let element = a[index];
+
+    println!(
+        "The value of the element at index {} is: {}",
+        index, element
+    );
 }
 
 fn test() {
