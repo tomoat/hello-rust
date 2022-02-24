@@ -36,6 +36,8 @@ fn main() {
     println!("===========================");
     array_operations();
     println!("===========================");
+    flow_control();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -1131,9 +1133,17 @@ fn array_operations() {
     let a = [1, 2, 3, 4, 5];
     let slice = &a[1..3]; // 创建一个数组切片，其中包含 a 的第二个元素，第三个元素。
     assert_eq!(slice, &[2, 3]);
-    println!("{:?}", slice);
+    println!("切片：{:?}", slice);
 
     array_slice_operations();
+}
+
+fn _io_array_mut() {
+    let mut a = [1, 2, 3, 4, 5];
+    println!("{:?}", a);
+    // 可变数组的元素可以被修改
+    a[0] = 10;
+    println!("{:?}", a);
 }
 
 fn array_slice_operations() {
@@ -1193,6 +1203,104 @@ fn _io_array() {
         "The value of the element at index {} is: {}",
         index, element
     );
+}
+
+// 流程控制
+fn flow_control() {
+    // 分支控制 if...else...和 match...及if let...else if let...
+    // 循环控制 while...loop...for...
+    // 在 Rust 语言中有三种循环方式：for、while 和 loop，其中 for 循环是 Rust 循环王冠上的明珠。
+    // 函数控制 return...break...continue...
+    for i in 0..5 {
+        print!("{}", i);
+    }
+    println!("");
+    for i in 1..=5 {
+        print!("{}", i);
+    }
+    println!("");
+    for i in (0..5).rev() {
+        print!("{}", i);
+    }
+    println!("");
+    // vec![1, 2, 3, 4, 5].into_iter().for_each(|x| print!("{}", x));
+    for item in &vec![1, 2, 3, 4, 5] {
+        print!("{}", item);
+    }
+    println!("");
+    // 如果不使用引用的话，所有权会被转移（move）到 for 语句块中，后面就无法再使用这个集合了
+    //如果想在循环中，修改该元素，可以使用 mut 关键字：
+    let mut collection = vec![1, 2, 3, 4, 5];
+    for item in &mut collection {
+        *item += 10;
+    }
+    println!("{:?}", collection);
+
+    // `for item in collection` equals to `for item in collection.into_iter()`
+    // `for item in &collection` equals to `for item in collection.iter()`
+    // `for item in &mut collection` equals to `for item in collection.iter_mut()`
+    // `for item in collection.iter().skip(2).take(2).rev()` equals to `for item in collection.iter().skip(2).take(2).rev()`
+
+    // 循环控制的另一个重要特性是，可以在循环中使用 break 和 continue。
+    // break 可以跳出当前循环，而 continue 可以跳过本次循环的剩余执行部分。
+    // 如果你想跳出多层循环，可以使用 break 2，表示跳出两层循环。
+    // 如果想在循环中获取循环变量，可以使用 loop { } 和 break。
+    // 如果你想在循环中使用 break，你必须使用 loop { }，因为 break 只能在 loop { } 中使用。
+    // 如果你想在循环中获取元素的索引
+    // 可以使用 for (i, item) in collection.iter().enumerate()，这样就可以获取索引和元素了。
+
+    for i in 0..5 {
+        if i % 2 == 0 {
+            // 0, 2, 4 能被2整除跳出循环
+            continue;
+        }
+        print!("{}", i);
+    }
+    println!("");
+    for i in 1..5 {
+        // 若从0开始，因0能被2整除，所以不会打印并跳出整个循环
+        // 若从1开始，因1不能被2整除，所以打印1，2可以被2整除，所以不打印并跳出整个循环
+        if i % 2 == 0 {
+            break;
+        }
+        print!("{}", i);
+    }
+    println!("");
+    // 如果我们想用 for 循环控制某个过程执行 10 次，但是又不想单独声明一个变量来控制这个流程
+    // 可以用 _ 来替代 i 用于 for 循环中，在 Rust 中 _ 的含义是忽略该值或者类型的意思，如果不使用 _，那么编译器会给你一个 变量未使用的 的警告
+    for _ in 0..5 {
+        print!("{}", "*");
+    }
+    println!("");
+
+    // while
+    let mut i = 0;
+    while i <= 5 {
+        print!("{}", i);
+        i += 1;
+    }
+    println!("");
+    let mut i = 0;
+    loop {
+        i += 1;
+        if i > 5 {
+            break;
+        }
+        print!("{}", i);
+    }
+    println!("");
+
+    // reak 可以单独使用，也可以带一个返回值，有些类似 return
+    // loop 是一个表达式，因此可以返回一个值
+    let mut counter = 0;
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+    println!("The result is {}", result);
 }
 
 fn test() {
