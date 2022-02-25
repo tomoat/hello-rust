@@ -1445,6 +1445,74 @@ fn match_control() {
     } else {
         println!("x is None");
     }
+
+    // Rust 标准库中提供了一个非常实用的宏：matches!，它可以将一个表达式跟模式进行匹配，然后返回匹配的结果 true or false。
+    #[derive(Debug)]
+    enum MyEnum {
+        A,
+        B,
+        C,
+    }
+    let v = vec![MyEnum::A, MyEnum::B, MyEnum::C, MyEnum::A];
+    let mut count = 0;
+    for v in v.iter() {
+        if matches!(v, MyEnum::B) {
+            count += 1;
+        }
+    }
+    println!("count is {}", count);
+    let duplicate_count = v.iter().filter(|&v| matches!(v, MyEnum::A)).count();
+    println!("duplicate_count is {}", duplicate_count);
+
+    let s = v
+        .iter()
+        .filter(|&v| matches!(v, MyEnum::A))
+        .collect::<Vec<_>>();
+    println!("s is {:?}", s);
+
+    // 如果想对 v 进行过滤，只保留类型是 MyEnum::Foo 的元素
+
+    // 枚举类型不能用 == 进行判断, 无法将 x 直接跟一个枚举成员进行比较
+    // println!("{}", MyEnum::A == MyEnum::A);
+    // v.iter().filter(|x| x == MyEnum::A);
+
+    // let foo = Foo {
+    //     a: 1,
+    //     b: 2,
+    // };
+    let foo = 'f';
+    assert!(matches!(foo, 'f'));
+    assert!(matches!(foo, 'f' | 'o'));
+    assert!(matches!(foo, 'a' ..= 'z' | 'A' ..= 'Z'));
+    let bar = Some(4);
+    assert!(matches!(bar, Some(x) if x > 3));
+
+    // 变量覆盖
+    // 无论是是 match 还是 if let，他们都可以在模式匹配时覆盖掉老的值，绑定新的值:
+    let x = Some(5);
+    let y = match x {
+        Some(mut val) => {
+            val = 6;
+            Some(val)
+        }
+        None => None,
+    };
+    println!("x is {:?}, y is {:?}", x, y);
+
+    let age = Some(30);
+    println!("Before is {:?}", age);
+    if let Some(mut age2) = age {
+        age2 = 32;
+        println!("Current is {:?}", age2);
+    }
+    println!("After is {:?}", age);
+
+    match age {
+        Some(age) => println!("age is {}", age),
+        // None => println!("age is None"),
+        _ => println!("age is other"),
+    }
+    println!("{:?}", age);
 }
 
 fn test() {
