@@ -38,6 +38,8 @@ fn main() {
     println!("===========================");
     flow_control();
     println!("===========================");
+    match_control();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -1301,6 +1303,148 @@ fn flow_control() {
         }
     };
     println!("The result is {}", result);
+}
+
+fn match_control() {
+    #[allow(dead_code)]
+    enum Direction {
+        North,
+        East,
+        South,
+        West,
+    }
+
+    // match 的匹配必须要穷举出所有可能，因此这里用 _ 来代表未列出的所有可能性
+    // match 的每一个分支都必须是一个表达式，且所有分支的表达式最终返回值的类型必须相同
+    // X | Y，是逻辑运算符 或，代表该分支可以匹配 X 也可以匹配 Y，只要满足一个即可
+    // 其实 match 跟其他语言中的 switch 非常像，_ 类似于 switch 中的 default
+    // match 后紧跟着的是一个表达式，跟 if 很像，但是 if 后的表达式必须是一个布尔值，而 match 后的表达式返回值可以是任意类型
+    let direction = Direction::North;
+    match direction {
+        // Direction::North => println!("north"),
+        Direction::East => println!("east"),
+        // Direction::South => println!("south"),
+        // Direction::West => println!("west"),
+        Direction::North | Direction::South => {
+            println!("South or North");
+        }
+        _ => println!("West"),
+    }
+
+    #[allow(dead_code)]
+    enum Coin {
+        Penny,
+        Nickel,
+        Dime,
+        Quarter,
+    }
+    fn value_in_cents(coin: Coin) -> u8 {
+        match coin {
+            Coin::Penny => {
+                println!("Lucky penny!");
+                1
+            }
+            Coin::Nickel => 5,
+            Coin::Dime => 10,
+            Coin::Quarter => 25,
+        }
+    }
+    value_in_cents(Coin::Penny);
+
+    // enum IpAddr {
+    //     V4(u8, u8, u8, u8),
+    //     V6(String),
+    // }
+    // let home = IpAddr::V4(127, 0, 0, 1);
+    // let loopback = IpAddr::V6(String::from("::1"));
+    #[allow(dead_code)]
+    enum IpAddr {
+        Ipv4,
+        Ipv6,
+    }
+    let ip1 = IpAddr::Ipv6;
+    let ip_str = match ip1 {
+        // IpAddr::Ipv4 => "IPv4",
+        // IpAddr::Ipv6 => "IPv6",
+        IpAddr::Ipv4 => "127.0.0.1",
+        _ => "::1",
+    };
+    println!("ip_str is {}", ip_str);
+
+    // 美国的某个州（因为在 1999 年到 2008 年间，美国在 25 美分(Quarter)硬币的背后为 50 个州印刷了不同的标记，其它硬币都没有这样的设计）,获取到25美分硬币上刻印的州名称
+    #[derive(Debug)]
+    #[allow(dead_code)]
+    enum UsState {
+        Alabama,
+        Alaska,
+        // ...
+        // 注意，这里的编译器会把这些州的名字自动转换为大写
+        // 所以这里的名字必须是大写的
+        California,
+        // ...
+    }
+    #[allow(dead_code)]
+    #[derive(Debug)]
+    enum Coin2 {
+        Penny,
+        Nickel,
+        Dime,
+        Quarter(UsState),
+    }
+    let coin = Coin2::Quarter(UsState::Alaska);
+    println!("coin is {:?}", coin);
+    let mut count = 0;
+    match coin {
+        Coin2::Quarter(state) => println!("State quarter from {:?}!", state),
+        _ => count += 1,
+    }
+    println!("count is {}", count);
+
+    fn _value_in_cents(coin: Coin2) -> u8 {
+        match coin {
+            Coin2::Penny => 1,
+            Coin2::Nickel => 5,
+            Coin2::Dime => 10,
+            Coin2::Quarter(state) => {
+                println!("State quarter from {:?}!", state);
+                25
+            }
+        }
+    }
+
+    enum Action {
+        Say(String),
+        MoveTo(i32, i32),
+        ChangeColorRGB(u16, u16, u16),
+    }
+    // let actions = vec![
+    //     Action::MoveTo(1, 2),
+    //     Action::Say("hello".to_string()),
+    //     Action::ChangeColorRGB(255, 0, 0),
+    // ];
+    let actions = [
+        Action::Say("Hello Rust".to_string()),
+        Action::MoveTo(1, 2),
+        Action::ChangeColorRGB(255, 0, 0),
+    ];
+    // actions 隐式调用了 iter() 方法，返回的是一个迭代器，这里的迭代器是一个 &Action
+    // 穷尽匹配，穷举所有的 Action，并且每一个 Action 都调用了一次 visit_action() 方法
+    // _ 通配符，代表剩余需要匹配的部分，放置于最后一个通配符的位置，可以匹配任意数量的遗漏元素
+    // _ => (), 这个表达式是一个空表达式，它的作用是把剩余的元素放到一个空的表达式中，这个表达式可以是任意的，（）表示返回单元类型与所有分支返回值得类型相同，所以匹配到_后，什么也不会发生
+    for action in actions {
+        match action {
+            Action::MoveTo(x, y) => println!("Point from (0, 0) move to ({}, {})", x, y),
+            Action::Say(s) => println!("Say {}", s),
+            Action::ChangeColorRGB(r, g, b) => println!("Change color to ({}, {}, {})", r, g, b),
+        }
+    }
+    // 在某些场景下，我们其实只关心某一个值是否存在，此时 match 就显得过于啰嗦,可以使用 if let 匹配,如果没有匹配到，则会执行 else 分支
+    let x = Some(5);
+    if let Some(x_val) = x {
+        println!("x is {}", x_val);
+    } else {
+        println!("x is None");
+    }
 }
 
 fn test() {
