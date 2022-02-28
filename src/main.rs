@@ -1316,7 +1316,7 @@ fn match_control() {
 
     // match 的匹配必须要穷举出所有可能，因此这里用 _ 来代表未列出的所有可能性
     // match 的每一个分支都必须是一个表达式，且所有分支的表达式最终返回值的类型必须相同
-    // X | Y，是逻辑运算符 或，代表该分支可以匹配 X 也可以匹配 Y，只要满足一个即可
+    // X | Y，是逻辑运算符 或，代表该分支可以匹配 X 也可以匹配 Y，只要满足一个即可, 单分支多模式的匹配可以用 | 来连接
     // 其实 match 跟其他语言中的 switch 非常像，_ 类似于 switch 中的 default
     // match 后紧跟着的是一个表达式，跟 if 很像，但是 if 后的表达式必须是一个布尔值，而 match 后的表达式返回值可以是任意类型
     let direction = Direction::North;
@@ -1513,6 +1513,150 @@ fn match_control() {
         _ => println!("age is other"),
     }
     println!("{:?}", age);
+
+    let mut stack = Vec::new();
+    stack.push(1);
+    stack.push(2);
+    stack.push(3);
+    println!("stack is {:?}", stack);
+    while let Some(top) = stack.pop() {
+        println!("top is {}", top);
+    }
+
+    // 这里使用 enumerate 方法产生一个迭代器，该迭代器每次迭代会返回一个 (索引，值) 形式的元组，然后用 (index,value) 来匹配。
+    let v = vec!['a', 'b', 'c'];
+    for (index, value) in v.iter().enumerate() {
+        println!("{} is at index {}", value, index);
+    }
+
+    let x = Some(5);
+    let y = 10;
+
+    match x {
+        Some(50) => println!("Got 50"),
+        Some(y) => println!("Matched, y = {:?}", y),
+        _ => println!("Default case, x = {:?}", x),
+    }
+
+    println!("at the end: x = {:?}, y = {:?}", x, y);
+
+    // 通过序列 ..= 匹配值的范围, 序列不仅可以用循环中，还能用于匹配模式，序列只允许用于数字或字符类型，原因是：它们可以连续，字符和数字值是 Rust 中仅有的可以用于判断是否为空的类型
+    let x = 5;
+    match x {
+        1..=5 => println!("one through five"),
+        // 'a'..='z' => println!("a through z"),
+        _ => println!("something else"),
+    }
+
+    // 解构结构体
+    #[derive(Debug)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+    let p = Point { x: 0, y: 7 };
+    let Point { x: a, y: b } = p;
+    // let Point { x, y } = p;
+    assert_eq!(0, a);
+    assert_eq!(7, b);
+
+    let p = Point { x: 0, y: 7 };
+
+    match p {
+        Point { x, y: 0 } => println!("On the x axis at {}", x),
+        // Point { x: 0, y } => println!("On the y axis at {}", y),
+        Point { x, y } => println!("On neither axis: ({}, {})", x, y),
+    }
+
+    let s = Some(String::from("Hello!"));
+    // s 是一个拥有所有权的动态字符串，因为 s 的值会被转移给 _s,所以会报错
+    // if let Some(_s) = s {
+    //     println!("found a string");
+    // }
+    if let Some(_) = s {
+        println!("found a string");
+    }
+    println!("{:?}", s);
+
+    let s = (1..=10).map(|x| x * x).collect::<Vec<_>>();
+    // let s1 = (..s.len()).map(|x| s[x]).collect::<Vec<_>>();
+    println!("{:?}", s);
+
+    // 用 .. 忽略剩余值
+    // 对于有多个部分的值，可以使用 .. 语法来只使用部分值而忽略其它值，这样也不用再为每一个被忽略的值都单独列出下划线。.. 模式会忽略模式中剩余的任何没有显式匹配的值部分。
+    #[allow(dead_code)]
+    struct Point2 {
+        x: i32,
+        y: i32,
+        z: i32,
+    }
+    let origin = Point2 { x: 0, y: 0, z: 0 };
+    match origin {
+        Point2 { x, .. } => println!("x is {}", x),
+    }
+
+    // 可以使用 @ 来指定一个变量的名字，这样就可以在模式中使用这个变量了
+    let numbers = (2, 4, 8, 16, 32);
+    match numbers {
+        (first, .., last) => println!("Some numbers: {}, {}", first, last),
+    }
+
+    // 匹配守卫提供的额外条件
+    let num = Some(4);
+    match num {
+        Some(x) if x < 5 => println!("less than five: {}", x),
+        Some(x) => println!("{}", x),
+        // some_number @ Some(x) => println!("{:?}", some_number),
+        None => (),
+        // _ => (),
+    }
+
+    let x = 4;
+    let y = false;
+
+    match x {
+        4 | 5 | 6 if y => println!("yes"),
+        _ => println!("no"),
+    }
+
+    enum Message {
+        Hello { id: i32 },
+    }
+
+    let msg = Message::Hello { id: 5 };
+
+    match msg {
+        Message::Hello {
+            id: id_variable @ 3..=7,
+        } => {
+            println!("Found an id in range: {}", id_variable)
+        }
+        Message::Hello { id: 10..=12 } => {
+            println!("Found an id in another range")
+        }
+        Message::Hello { id } => {
+            println!("Found some other id: {}", id)
+        }
+    }
+
+    // 绑定新变量 `p`，同时对 `Point` 进行解构
+    let p @ Point { x: px, y: py } = Point { x: 10, y: 23 };
+    println!("x: {}, y: {}", px, py);
+    println!("{:?}", p);
+
+    let point = Point { x: 10, y: 5 };
+    if let p @ Point { x: 10, y } = point {
+        println!("x is 10 and y is {} in {:?}", y, p);
+    } else {
+        println!("x was not 10 :(");
+    }
+
+    match 1 {
+        num @ (1 | 2) => {
+            println!("{}", num);
+        }
+        _ => {}
+    }
 }
 
 fn test() {
