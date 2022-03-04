@@ -40,6 +40,8 @@ fn main() {
     println!("===========================");
     match_control();
     println!("===========================");
+    method_test();
+    println!("===========================");
 }
 
 fn greet_world() {
@@ -1657,6 +1659,128 @@ fn match_control() {
         }
         _ => {}
     }
+}
+
+#[allow(dead_code)]
+fn method_test() {
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+    impl Point {
+        fn get_x(&self) -> i32 {
+            self.x
+        }
+    }
+
+    let p = Point { x: 10, y: 20 };
+    println!("{}", p.get_x());
+
+    struct Point2 {
+        x: i32,
+        y: i32,
+    }
+    impl Point2 {
+        fn get_x(&self) -> i32 {
+            self.x
+        }
+    }
+
+    let p = Point2 { x: 10, y: 20 };
+    println!("{}", p.get_x());
+
+    // 在结构体中实现接口
+    struct Point3 {
+        x: i32,
+        y: i32,
+    }
+
+    impl Point3 {
+        fn get_x(&self) -> i32 {
+            self.x
+        }
+    }
+
+    impl Point3 {
+        fn get_y(&self) -> i32 {
+            self.y
+        }
+    }
+
+    let p = Point3 { x: 10, y: 20 };
+    println!("{}", p.get_x());
+    println!("{}", p.get_y());
+
+    // 在函数中实现接口
+    struct Point4 {
+        x: i32,
+        y: i32,
+    }
+
+    fn get_x(p: &Point4) -> i32 {
+        p.x
+    }
+
+    fn get_y(p: &Point4) -> i32 {
+        p.y
+    }
+
+    let p = Point4 { x: 10, y: 20 };
+    println!("{}", get_x(&p));
+    println!("{}", get_y(&p));
+
+    // 使用impl关键字实现接口（定义方法）
+    struct Circle {
+        x: f64,
+        y: f64,
+        radius: f64,
+    }
+    impl Circle {
+        // new 是Circle的关联函数，因此它的第一参数不是self
+        // 这种方法往往用于初始化当前结构体的实例即创建新的实例
+        fn new(x: f64, y: f64, radius: f64) -> Circle {
+            Circle { x, y, radius }
+        }
+        // 实现Circle接口的方法, 可以使用self参数来访问结构体的字段, &self表示借用当前Circle结构体的引用
+        fn area(&self) -> f64 {
+            std::f64::consts::PI * (self.radius * self.radius)
+        }
+    }
+    pub struct Rectangle {
+        width: f64,
+        height: f64,
+    }
+
+    // 允许方法名和结构体的字段名相同
+    impl Rectangle {
+        // fn width(&self) -> bool {
+        //     self.width > 0.0
+        // }
+        pub fn new(width: f64, height: f64) -> Self {
+            Rectangle { width, height }
+        }
+        pub fn is_square(&self) -> bool {
+            self.width == self.height
+        }
+        // 适用于实现getter访问器
+        pub fn width(&self) -> f64 {
+            self.width
+        }
+        pub fn area(&self) -> f64 {
+            self.width * self.height
+        }
+    }
+    let c = Circle::new(0.0, 0.0, 2.0);
+    let r = Rectangle {
+        width: 2.0,
+        height: 3.0,
+    };
+    println!("{}", c.area());
+    println!("{}", r.area());
+    println!("width: {}", r.width);
+    let r2 = Rectangle::new(3.0, 4.0);
+    println!("Is width equal to height : {}", r2.is_square());
+    println!("width: {}", r2.width);
 }
 
 fn test() {
